@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj": {}
+    "C:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj": {}
   },
   "projects": {
-    "c:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj": {
+    "C:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj",
+        "projectUniqueName": "C:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj",
         "projectName": "SimpleWebApp",
-        "projectPath": "c:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj",
+        "projectPath": "C:\\Reposits\\SimpleWebApp\\SimpleWebApp\\SimpleWebApp.csproj",
         "packagesPath": "C:\\Users\\rund2\\.nuget\\packages\\",
-        "outputPath": "c:\\Reposits\\SimpleWebApp\\SimpleWebApp\\obj\\",
+        "outputPath": "C:\\Reposits\\SimpleWebApp\\SimpleWebApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

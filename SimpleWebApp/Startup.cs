@@ -5,9 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Primitives;
 
 using static System.Diagnostics.Debug;
 
@@ -15,6 +12,8 @@ namespace SimpleWebApp
 {
     public class Startup
     {
+        private static readonly PredictionsManager pm = new PredictionsManager();
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -91,11 +90,10 @@ namespace SimpleWebApp
 
                 endpoints.MapGet("/randomPrediction", async context =>
                 {
-                    PredictionsManager pm = new PredictionsManager();
                     await context.Response.WriteAsync(pm.GetRandomPrediction());
                 });
 
-                endpoints.MapGet("/addPrediction", async context =>
+                /*endpoints.MapGet("/addPrediction", async context =>
                 {
                     var res = context.Request.Headers[":path"][0].Split('?')[1];
                     Dictionary<string, string> paramentars = new Dictionary<string, string>();
@@ -107,15 +105,20 @@ namespace SimpleWebApp
                     if (paramentars.ContainsKey("text")) { pm.AddPrediction(paramentars["text"]); }
 
                     await context.Response.WriteAsync("OK");
-                });
-
-                /*endpoints.MapGet("/addPrediction", async context =>
-                {
-                    PredictionsManager pm = new PredictionsManager();
-                    //var query = context.Request.Query;
-
-                    await context.Response.WriteAsync("OK");
                 });*/
+
+                endpoints.MapGet("/addPrediction", async context =>
+                {
+                    var query = context.Request.Query;
+
+                    WriteLine(query["password"]);
+                    WriteLine(query["login"]);
+                    WriteLine(query["test"]);
+                    WriteLine(query["answer"]);
+
+                    if (query.ContainsKey("newPrediction")) { pm.AddPrediction(query["newPrediction"]); await context.Response.WriteAsync("predition added"); }
+                    else { await context.Response.WriteAsync("Error to add prediction"); }
+                });
             });
         }
     }
