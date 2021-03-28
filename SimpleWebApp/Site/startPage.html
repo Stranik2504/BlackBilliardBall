@@ -67,14 +67,10 @@
             }*/
         };
 
-        async function onClick() {
-            let password = document.getElementById("password");
-            let longin = document.getElementById("login");
+        async function onClick() { 
+            let correct = await fetch("../login", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Login: document.getElementById("login").value, Password: document.getElementById("password").value }) });
 
-            let correctLogin = await (await fetch("../login")).text();
-            let correctPassword = await (await fetch("../password")).text();
-
-            if (password.value === correctPassword && longin.value.toLowerCase() === correctLogin) {
+            if (correct.status === 202) {
                 console.log("Ok");
                 window.location = "../adminPage";
             }

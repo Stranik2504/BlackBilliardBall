@@ -35,7 +35,7 @@
     <center><div style="margin-top: 10px; margin-left: 10px; font-family: var(--bs-font-sans-serif); color: #EEEEEE">
         <table>
             <tr>
-                <td colspan="2"><div style="font-size: 20px">Добавить новый вариант предсказания</div></td>
+                <td colspan="2"><div id="info" style="font-size: 20px">Добавить новый вариант предсказания</div></td>
             </tr>
             <tr>
                 <td>
@@ -49,10 +49,36 @@
     </div></center>
 
     <script>
-        function onAddButtonClick() {
-            //fetch("../addPrediction?newPrediction=" + document.getElementById("input").value).then(result => result.text().then(text => alert(text)));
-            fetch("../addPrediction?newPrediction=" + document.getElementById("input").value + "&password=admin&login=admin&test=5*2&answer=10");
-         }
+        window.onload = function () {
+            getPrediction();
+        };
+
+        async function Delete(namePrediction) {
+            fetch("../deletePrediction", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ PredictionString: namePrediction }) }).then(async x => {
+                document.getElementById("predictions").innerHTML = await (await fetch("../getPredictions")).text();
+            });
+        }
+
+        async function Edit(numPrediction) {
+            fetch("../editPrediction", { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ PredictionString: document.getElementById(numPrediction).value, NumPresiction: numPrediction }) }).then(x => {
+                alert("element changed");
+            });
+        }
+
+        async function onAddButtonClick() {
+            fetch("../addPrediction", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ PredictionString: document.getElementById("input").value }) }).then(async x => {
+                document.getElementById("predictions").innerHTML = await (await fetch("../getPredictions")).text();
+            });
+
+            document.getElementById("input").value = "";
+        }
+
+        async function getPrediction() {
+            let h1 = document.createElement("center");
+            h1.id = "predictions";
+            h1.innerHTML = await (await fetch("../getPredictions")).text();
+            document.body.append(h1);
+        }
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js" integrity="sha384-q2kxQ16AaE6UbzuKqyBE9/u/KzioAlnx2maXQHiDX9d4/zp8Ok3f+M7DPm+Ib6IU" crossorigin="anonymous"></script>
