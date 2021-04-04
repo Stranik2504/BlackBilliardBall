@@ -35,17 +35,17 @@ namespace SimpleWebApp
             {
                 endpoints.MapGet("", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site\startPage.html"));
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/startPage.html"));
                 });
 
                 endpoints.MapGet("/adminPage", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site\adminPage.html"));
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/adminPage.html"));
                 });
 
                 endpoints.MapGet("/answersPage", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site\answersPage.html"));
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/answersPage.html"));
                 });
 
                 endpoints.MapPost("/login", async context =>
@@ -58,7 +58,7 @@ namespace SimpleWebApp
 
                 endpoints.MapGet("/predictionsPage", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site\predictionsPage.html"));
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPage.html"));
                 });
 
                 endpoints.MapGet("/info", async context =>
