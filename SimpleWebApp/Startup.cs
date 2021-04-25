@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,8 @@ using SimpleWebApp.Classes;
 using Microsoft.AspNetCore.Identity;
 
 using static System.Diagnostics.Debug;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace SimpleWebApp
 {
@@ -19,6 +22,8 @@ namespace SimpleWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<PredictionsManager>();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = new PathString("/auth"));
+            services.AddAuthorization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -31,34 +36,48 @@ namespace SimpleWebApp
 
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("", async context =>
+                endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site/startPage.html"));
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPage.html"));
+                });
+
+                endpoints.MapGet("/auth", async context =>
+                {
+                    await context.Response.WriteAsync(File.ReadAllText(@"Site/loginPage.html"));
+                });
+
+                endpoints.MapPost("/login", async context =>
+                {
+                    var credentials = await context.Request.ReadFromJsonAsync<Credential>();
+                    var user = new Credential() { Login = "admin", Password = "admin" };
+
+                    if (credentials.Login == user.Login && credentials.Password == user.Password)
+                    {
+                        List<Claim> claims = new()
+                        {
+                            new Claim(ClaimsIdentity.DefaultNameClaimType, credentials.Login)
+                        };
+
+                        ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+                        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+
+                        context.Response.Redirect("/adminPage");
+                    }
                 });
 
                 endpoints.MapGet("/adminPage", async context =>
                 {
                     await context.Response.WriteAsync(File.ReadAllText(@"Site/adminPage.html"));
-                });
+                }).RequireAuthorization();
 
                 endpoints.MapGet("/answersPage", async context =>
                 {
                     await context.Response.WriteAsync(File.ReadAllText(@"Site/answersPage.html"));
-                });
-
-                endpoints.MapPost("/login", async context =>
-                {
-                    var user = await context.Request.ReadFromJsonAsync<User>();
-                    if (user.Login == "admin" && user.Password == "admin") { context.Response.StatusCode = StatusCodes.Status202Accepted; }
-                    else { context.Response.StatusCode = StatusCodes.Status203NonAuthoritative; }
-                    await context.Response.CompleteAsync();
-                });
-
-                endpoints.MapGet("/predictionsPage", async context =>
-                {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPage.html"));
                 });
 
                 endpoints.MapGet("/info", async context =>

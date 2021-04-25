@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SimpleWebApp.Classes
 {
-    public class User
+    public class Credential
     {
         public string Login { get; set; }
         public string Password { get; set; }

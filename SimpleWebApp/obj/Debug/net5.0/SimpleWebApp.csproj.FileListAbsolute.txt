@@ -21,3 +21,7 @@ C:\Reposits\SimpleWebApp\SimpleWebApp\obj\Debug\net5.0\ref\SimpleWebApp.dll
 C:\Reposits\SimpleWebApp\SimpleWebApp\obj\Debug\net5.0\SimpleWebApp.pdb
 C:\Reposits\SimpleWebApp\SimpleWebApp\obj\Debug\net5.0\SimpleWebApp.genruntimeconfig.cache
 C:\Reposits\SimpleWebApp\SimpleWebApp\obj\Debug\net5.0\SimpleWebApp.csprojAssemblyReference.cache
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\adminPage.html
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\answersPage.html
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\predictionsPage.html
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\loginPage.html
