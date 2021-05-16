@@ -52,7 +52,7 @@
 
         async function Delete(numPrediction) {
             fetch("../deletePrediction", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Id: numPrediction }) }).then(async x => {
-                document.getElementById("predictions").innerHTML = await (await fetch("../getPredictions")).text();
+                document.getElementById("predictions").innerHTML = await (await fetch("../gethtmlPredictions")).text();
             });
         }
 
@@ -64,7 +64,7 @@
 
         async function onAddButtonClick() {
             fetch("../addPrediction", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ PredictionString: document.getElementById("input").value }) }).then(async x => {
-                document.getElementById("predictions").innerHTML = await (await fetch("../getPredictions")).text();
+                document.getElementById("predictions").innerHTML = await (await fetch("../gethtmlPredictions")).text();
             });
 
             document.getElementById("input").value = "";
@@ -73,7 +73,7 @@
         async function getPrediction() {
             let h1 = document.createElement("center");
             h1.id = "predictions";
-            h1.innerHTML = await (await fetch("../getPredictions")).text();
+            h1.innerHTML = await (await fetch("../gethtmlPredictions")).text();
             document.body.append(h1);
         }
     </script>

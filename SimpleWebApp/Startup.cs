@@ -22,7 +22,8 @@ namespace SimpleWebApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(new PredictionsManager(new PredictionDatabseRepository()));
+            services.AddSingleton<IPredictionRepository, PredictionDatabseRepository>();
+            services.AddSingleton<PredictionsManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = new PathString("/auth"));
             services.AddAuthorization();
         }
@@ -100,7 +101,7 @@ namespace SimpleWebApp
                     await context.Response.WriteAsync(app.ApplicationServices.GetService<PredictionsManager>().GetRandomPrediction());
                 });
 
-                endpoints.MapGet("/getPredictions", async context =>
+                endpoints.MapGet("/gethtmlPredictions", async context =>
                 {
                     string output = "<table><tr><td><center><h7 style=\"color: white\">Number</h7></center></td><td><center><h7 style=\"color: white\">Prediction</h7></center></td><td><center><h7 style=\"color: white\">Edit</h7></center></td><td><center><h7 style=\"color: white\">Delete</h7></center></td></tr>";
 
@@ -114,6 +115,11 @@ namespace SimpleWebApp
                     output += "</table>";
 
                     await context.Response.WriteAsync(output);
+                });
+
+                endpoints.MapGet("/getPredictions", async context =>
+                {
+                    await context.Response.WriteAsJsonAsync(app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions());
                 });
 
                 endpoints.MapPost("/addPrediction", async context =>
