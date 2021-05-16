@@ -10,7 +10,7 @@ namespace SimpleWebApp.Repository
 {
     public class PredictionDatabaseInMemory : IPredictionRepository
     {
-        private List<PredictionDto> _predictions = new();
+        private readonly List<PredictionDto> _predictions = new();
 
         public void SavePrediction(PredictionDto prediction)
         {
@@ -19,6 +19,8 @@ namespace SimpleWebApp.Repository
             prediction.Id = maxId + 1;
             _predictions.Add(prediction);
         }
+
+        public void SavePrediction(string PredictionString) => SavePrediction(new PredictionDto() { PredictionString = PredictionString });
 
         public void SavePredictions(params PredictionDto[] predictions) => _predictions.AddRange(predictions);
 

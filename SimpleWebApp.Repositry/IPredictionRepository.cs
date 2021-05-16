@@ -5,6 +5,7 @@ namespace SimpleWebApp.Repository
     public interface IPredictionRepository
     {
         void SavePrediction(PredictionDto prediction);
+        void SavePrediction(string PredictionString);
         void SavePredictions(params PredictionDto[] predictions);
         void SavePredictions(IEnumerable<PredictionDto> predictions);
 

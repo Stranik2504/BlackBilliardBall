@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using static System.Diagnostics.Debug;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using SimpleWebApp.Repository;
 
 namespace SimpleWebApp
 {
@@ -21,7 +22,7 @@ namespace SimpleWebApp
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<PredictionsManager>();
+            services.AddSingleton(new PredictionsManager(new PredictionDatabseRepository()));
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = new PathString("/auth"));
             services.AddAuthorization();
         }
@@ -63,7 +64,7 @@ namespace SimpleWebApp
                             new Claim(ClaimsIdentity.DefaultNameClaimType, credentials.Login)
                         };
 
-                        ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+                        ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
 
                         context.Response.Redirect("/adminPage");
@@ -88,7 +89,7 @@ namespace SimpleWebApp
                 endpoints.MapGet("/text", async context =>
                 {
                     var res = context.Request.Headers[":path"][0].Split('?')[1];
-                    Dictionary<string, string> paramentars = new Dictionary<string, string>();
+                    Dictionary<string, string> paramentars = new();
                     foreach (var item in res.Split(',')) { paramentars.Add(item.Split('=')[0], item.Split('=')[1]); }
 
                     await context.Response.WriteAsync(paramentars.ContainsKey("text") ? paramentars["text"] : "Ошибка");
@@ -106,7 +107,7 @@ namespace SimpleWebApp
                     int num = 0;
                     foreach (var item in app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions())
                     {
-                        output += $"<tr><td><center><h7 style=\"color: white\">{num + 1}</h7></center></td><td><input type=\"text\" id=\"{num}\" value=\"{item}\" style=\"color: black\">" + $"</td><td><center><button style=\"color: black\" onclick=\"Edit({num})\">✎</button></center></td><td><center><button style=\"color: red\" onclick=\"Delete('{item}')\">✘</button></center></td></tr>";
+                        output += $"<tr><td><center><h7 style=\"color: white\">{num + 1}</h7></center></td><td><input type=\"text\" id=\"{item.Id}\" value=\"{item.PredictionString}\" style=\"color: black\">" + $"</td><td><center><button style=\"color: black\" onclick=\"Edit({item.Id})\">✎</button></center></td><td><center><button style=\"color: red\" onclick=\"Delete({item.Id})\">✘</button></center></td></tr>";
                         num++;
                     }
 
@@ -134,7 +135,7 @@ namespace SimpleWebApp
                         return;
                     }
 
-                    app.ApplicationServices.GetService<PredictionsManager>().RemovePrediction((await context.Request.ReadFromJsonAsync<Prediction>()).PredictionString);
+                    app.ApplicationServices.GetService<PredictionsManager>().RemovePrediction((await context.Request.ReadFromJsonAsync<Prediction>()).Id);
                 });
 
                 endpoints.MapPut("/editPrediction", async context =>
@@ -145,9 +146,9 @@ namespace SimpleWebApp
                         return;
                     }
 
-                    var query = await context.Request.ReadFromJsonAsync<EditPrediction>();
+                    var query = await context.Request.ReadFromJsonAsync<Prediction>();
 
-                    app.ApplicationServices.GetService<PredictionsManager>().Edit(query.NumPresiction, query.PredictionString);
+                    app.ApplicationServices.GetService<PredictionsManager>().Edit(query.Id, query.PredictionString);
                 });
             });
         }

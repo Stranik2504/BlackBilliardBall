@@ -17,6 +17,8 @@ namespace SimpleWebApp.Repository
             int rowsAffected = db.Execute(sqlQuery, prediction);
         }
 
+        public void SavePrediction(string PredictionString) => SavePrediction(new PredictionDto() { PredictionString = PredictionString });
+
         public void SavePredictions(params PredictionDto[] predictions) => predictions.ToList().ForEach(x => SavePrediction(x));
 
         public void SavePredictions(IEnumerable<PredictionDto> predictions) => predictions.ToList().ForEach(x => SavePrediction(x));

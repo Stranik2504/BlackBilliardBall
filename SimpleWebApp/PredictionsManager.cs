@@ -2,31 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SimpleWebApp.Classes;
+using SimpleWebApp.Repository;
 
 namespace SimpleWebApp
 {
     public class PredictionsManager
     {
-        private readonly List<string> _predictions = new List<string> { "Привет", "как", "твои", "дела", "?" };
+        private readonly IPredictionRepository _repository;
+        private readonly Random _random = new();
+
+        public PredictionsManager(IPredictionRepository repository) => _repository = repository;
 
         public string GetRandomPrediction()
         {
-            if (_predictions.Count > 0) { return _predictions[new Random().Next(0, _predictions.Count)]; }
+            var predictions = _repository.GetAllPrediction();
+
+            if (predictions.Length > 0) { return predictions[_random.Next(0, predictions.Length)].PredictionString; }
             else { return "Когда-нибудь здесь будет саркастичный ответ, но пока вот тебе салат. 🥗"; }
         }
 
-        public void AddPrediction(string prediction) => _predictions.Add(prediction);
+        public void AddPrediction(string prediction) => _repository.SavePrediction(prediction);
 
-        public void RemovePrediction(string prediction) => _predictions.Remove(prediction);
+        public void RemovePrediction(string prediction) => _repository.RemovePredictionByPredictionString(prediction);
 
-        public IReadOnlyList<string> GetAllPredictions() => _predictions.AsReadOnly();
+        public void RemovePrediction(long id) => _repository.RemovePredictionById(id);
 
-        public void Edit(int numPrediction, string newPrediction)
-        {
-            if (numPrediction < _predictions.Count)
-            {
-                _predictions[numPrediction] = newPrediction;
-            }
-        }
+        public IReadOnlyList<Prediction> GetAllPredictions() => _repository.GetAllPrediction().Select(x => new Prediction() { PredictionString = x.PredictionString, Id = x.Id }).ToList().AsReadOnly();
+
+        public void Edit(long numPrediction, string newPrediction) => _repository.UpdatePredictionById(new PredictionDto() { Id = numPrediction, PredictionString = newPrediction });
     }
 }

@@ -20,7 +20,7 @@ namespace SimpleWebApp.Repository
         public CredentialsDto GetUser(long id)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"SELECT * FROM users WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM users WHERE Id = @Id";
 
             return db.QuerySingle<CredentialsDto>(sqlQuery, new CredentialsDto() { Id = id });
         }
@@ -28,7 +28,7 @@ namespace SimpleWebApp.Repository
         public CredentialsDto GetExist(long id)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"SELECT * FROM users WHERE Id = @Id";
+            string sqlQuery = "SELECT * FROM users WHERE Id = @Id";
 
             var result = db.QuerySingle<CredentialsDto>(sqlQuery, new CredentialsDto() { Id = id });
             return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
@@ -37,7 +37,7 @@ namespace SimpleWebApp.Repository
         public CredentialsDto GetExist(CredentialsDto credential)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"SELECT * FROM users WHERE Login = @Login AND Password = @Password";
+            string sqlQuery = "SELECT * FROM users WHERE Login = @Login AND Password = @Password";
 
             var result = db.QuerySingle<CredentialsDto>(sqlQuery, credential);
             return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
@@ -46,7 +46,7 @@ namespace SimpleWebApp.Repository
         public void UpdateUser(CredentialsDto credential)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"UPDATE users SET Login = @Login, Password = @Password WHERE Id = @Id";
+            string sqlQuery = "UPDATE users SET Login = @Login, Password = @Password WHERE Id = @Id";
 
             int rowsAffected = db.Execute(sqlQuery, credential);
         }
@@ -54,7 +54,7 @@ namespace SimpleWebApp.Repository
         public void RemoveUserById(long id)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"DELETE FROM users WHERE Id = @id";
+            string sqlQuery = "DELETE FROM users WHERE Id = @id";
 
             int rowsAffected = db.Execute(sqlQuery, new { id });
         }
@@ -62,7 +62,7 @@ namespace SimpleWebApp.Repository
         public void RemoveUserByLogin(string login)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = $"DELETE FROM users WHERE Login = @login";
+            string sqlQuery = "DELETE FROM users WHERE Login = @login";
 
             int rowsAffected = db.Execute(sqlQuery, new { login });
         } 

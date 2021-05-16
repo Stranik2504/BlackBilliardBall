@@ -10,4 +10,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleWebApp.Repositry\SimpleWebApp.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

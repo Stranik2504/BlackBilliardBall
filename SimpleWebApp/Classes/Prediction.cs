@@ -7,6 +7,7 @@ namespace SimpleWebApp.Classes
 {
     public class Prediction
     {
+        public long Id { get; set; }
         public string PredictionString { get; set; }
     }
 }
