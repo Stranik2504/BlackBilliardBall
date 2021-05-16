@@ -34,7 +34,7 @@ namespace SimpleWebApp.Repository
         {
             foreach (var user in _users)
             {
-                if (user.Login == credential.Login && user.Password == credential.Password) return user;
+                if (user.Login == credential.Login && user.Password == credential.Password && user.Email == credential.Email) return user;
             }
 
             return new CredentialsDto();
@@ -48,6 +48,8 @@ namespace SimpleWebApp.Repository
                 {
                     _users[i].Login = credential.Login;
                     _users[i].Password = credential.Password;
+                    _users[i].Email = credential.Email;
+                    _users[i].Roles = credential.Roles;
                 }
             }
         }
@@ -75,5 +77,41 @@ namespace SimpleWebApp.Repository
                 }
             }
         }
+
+        public void RemoveUserByEmail(string email)
+        {
+            for (int i = 0; i < _users.Count; i++)
+            {
+                if (_users[i].Email == email)
+                {
+                    _users.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        public CredentialsDto GetExistByEmail(string email)
+        {
+            foreach (var user in _users)
+            {
+                if (user.Email == email) return user;
+            }
+
+            return new CredentialsDto();
+        }
+
+        public CredentialsDto GetExistByLogin(string login)
+        {
+            foreach (var user in _users)
+            {
+                if (user.Login == login) return user;
+            }
+
+            return new CredentialsDto();
+        }
+
+        public CredentialsDto GetUserByLogin(string login) => _users.Where(x => x.Login == login).FirstOrDefault();
+
+        public CredentialsDto GetUserByEmail(string email) => _users.Where(x => x.Email == email).FirstOrDefault();
     }
 }

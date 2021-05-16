@@ -12,8 +12,13 @@ namespace SimpleWebApp.Repository
         void UpdateUser(CredentialsDto credential);
         void RemoveUserById(long id);
         void RemoveUserByLogin(string login);
+        void RemoveUserByEmail(string email);
         CredentialsDto GetExist(long id);
+        CredentialsDto GetExistByEmail(string email);
+        CredentialsDto GetExistByLogin(string login);
         CredentialsDto GetExist(CredentialsDto credential);
         CredentialsDto GetUser(long id);
+        CredentialsDto GetUserByLogin(string login);
+        CredentialsDto GetUserByEmail(string email);
     }
 }

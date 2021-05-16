@@ -11,7 +11,9 @@ namespace SimpleWebApp.Repository
         public long Id { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }
+        public string Email { get; set; }
+        public string Roles { get; set; }
 
-        public CredentialsDto() => (Id, Login, Password) = (-1, "", "");
+        public CredentialsDto() => (Id, Login, Password, Email, Roles) = (-1, "", "", "", "");
     }
 }
