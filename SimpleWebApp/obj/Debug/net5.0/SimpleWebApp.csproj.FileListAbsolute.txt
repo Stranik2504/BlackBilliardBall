@@ -51,3 +51,7 @@ C:\Reposits\SimpleWebApp\SimpleWebApp\obj\Debug\net5.0\SimpleWebApp.csproj.CopyC
 C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\registrationPage.html
 C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\predictionsPageAdmin.html
 C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Site\predictionsPageUser.html
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\System.Net.Http.Formatting.dll
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\System.Web.Http.dll
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Newtonsoft.Json.dll
+C:\Reposits\SimpleWebApp\SimpleWebApp\bin\Debug\net5.0\Newtonsoft.Json.Bson.dll

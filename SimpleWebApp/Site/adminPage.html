@@ -51,7 +51,7 @@
         };
 
         async function Delete(numPrediction) {
-            fetch("../deletePrediction", { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Id: numPrediction }) }).then(async x => {
+            fetch("../deletePrediction", { method: 'DELET', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ Id: numPrediction }) }).then(async x => {
                 document.getElementById("predictions").innerHTML = await (await fetch("../gethtmlPredictions")).text();
             });
         }

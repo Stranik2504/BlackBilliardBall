@@ -28,6 +28,7 @@ namespace SimpleWebApp
             services.AddSingleton<UserManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = new PathString("/auth"));
             services.AddAuthorization();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +43,10 @@ namespace SimpleWebApp
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseEndpoints(endpoints => {
+                endpoints.MapControllerRoute("default", "{controller}/{action}");
+            });
 
             app.UseEndpoints(endpoints =>
             {
@@ -106,23 +111,27 @@ namespace SimpleWebApp
                     else { await context.Response.WriteAsync("not_auth"); }
                 });
 
-                endpoints.MapGet("/adminPage", async context =>
+                /*endpoints.MapGet("/adminPage", async context =>
                 {
                     var user = app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles;
                     if (user == CredentialsDto.Admin) await context.Response.WriteAsync(File.ReadAllText(@"Site/adminPage.html"));
                     else context.Response.StatusCode = 404;
-                }).RequireAuthorization();
+                }).RequireAuthorization();*/
 
                 endpoints.MapGet("/answersPage", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                         await context.Response.WriteAsync(File.ReadAllText(@"Site/answersPage.html"));
+                    else 
+                        context.Response.StatusCode = 404;
                 }).RequireAuthorization();
 
                 endpoints.MapGet("/info", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                         await context.Response.WriteAsync("<h8><b>Info</b></h8></br><a href=\"../\">Go to start</a></br><a href=\"../adminPage\">Go to admin page</a></br><a href=\"../answersPage\">Go to answers page</a></br><a href=\"../predictionsPage\">Go to predictions page</a>");
+                    else 
+                        context.Response.StatusCode = 404;
                 }).RequireAuthorization();
 
                 endpoints.MapGet("/text", async context =>
@@ -135,6 +144,8 @@ namespace SimpleWebApp
 
                         await context.Response.WriteAsync(paramentars.ContainsKey("text") ? paramentars["text"] : "Ошибка");
                     }
+                    else 
+                        context.Response.StatusCode = 404;
                 }).RequireAuthorization();
 
                 endpoints.MapGet("/randomPrediction", async context =>
@@ -142,7 +153,7 @@ namespace SimpleWebApp
                     await context.Response.WriteAsync(app.ApplicationServices.GetService<PredictionsManager>().GetRandomPrediction());
                 });
 
-                endpoints.MapGet("/gethtmlPredictions", async context =>
+                /*endpoints.MapGet("/gethtmlPredictions", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
@@ -159,15 +170,19 @@ namespace SimpleWebApp
 
                         await context.Response.WriteAsync(output);
                     }
-                }).RequireAuthorization();
+                    else 
+                        context.Response.StatusCode = 404;
+                }).RequireAuthorization();*/
 
                 endpoints.MapGet("/getPredictions", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                         await context.Response.WriteAsJsonAsync(app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions());
+                    else 
+                        context.Response.StatusCode = 404;
                 }).RequireAuthorization();
 
-                endpoints.MapPost("/addPrediction", async context =>
+                /*endpoints.MapPost("/addPrediction", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
@@ -179,9 +194,11 @@ namespace SimpleWebApp
 
                         app.ApplicationServices.GetService<PredictionsManager>().AddPrediction((await context.Request.ReadFromJsonAsync<Prediction>()).PredictionString);
                     }
-                }).RequireAuthorization();
+                    else 
+                        context.Response.StatusCode = 404;
+                }).RequireAuthorization();*/
 
-                endpoints.MapPost("/deletePrediction", async context =>
+                /*endpoints.MapPost("/deletePrediction", async context =>
                 {
                     if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
@@ -192,8 +209,10 @@ namespace SimpleWebApp
                         }
 
                         app.ApplicationServices.GetService<PredictionsManager>().RemovePrediction((await context.Request.ReadFromJsonAsync<Prediction>()).Id);
-                    }  
-                }).RequireAuthorization();
+                    }
+                    else 
+                        context.Response.StatusCode = 404;
+                }).RequireAuthorization();*/
 
                 endpoints.MapPut("/editPrediction", async context =>
                 {
@@ -209,6 +228,8 @@ namespace SimpleWebApp
 
                         app.ApplicationServices.GetService<PredictionsManager>().Edit(query.Id, query.PredictionString);
                     }
+                    else 
+                        context.Response.StatusCode = 404;
                 }).RequireAuthorization();
             });
         }

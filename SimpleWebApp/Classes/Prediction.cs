@@ -9,5 +9,7 @@ namespace SimpleWebApp.Classes
     {
         public long Id { get; set; }
         public string PredictionString { get; set; }
+
+        public Prediction() => (Id, PredictionString) = (-1, "");
     }
 }
