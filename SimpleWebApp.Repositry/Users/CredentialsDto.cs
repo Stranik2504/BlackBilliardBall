@@ -8,6 +8,9 @@ namespace SimpleWebApp.Repository
 {
     public class CredentialsDto
     {
+        public const string User = "User";
+        public const string Admin = "Admin";
+
         public long Id { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }

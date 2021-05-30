@@ -20,24 +20,24 @@ namespace SimpleWebApp.Repository
 
         public CredentialsDto GetUser(long id) => _users.Where(x => x.Id == id).FirstOrDefault();
 
-        public CredentialsDto GetExist(long id)
+        public bool GetExist(long id)
         {
             foreach (var user in _users)
             {
-                if (user.Id == id) return user;
+                if (user.Id == id) return true;
             }
 
-            return new CredentialsDto();
+            return false;
         }
 
-        public CredentialsDto GetExist(CredentialsDto credential)
+        public bool GetExist(CredentialsDto credential)
         {
             foreach (var user in _users)
             {
-                if (user.Login == credential.Login && user.Password == credential.Password && user.Email == credential.Email) return user;
+                if (user.Login == credential.Login || user.Email == credential.Email) return true;
             }
 
-            return new CredentialsDto();
+            return false;
         }
 
         public void UpdateUser(CredentialsDto credential)
@@ -90,24 +90,24 @@ namespace SimpleWebApp.Repository
             }
         }
 
-        public CredentialsDto GetExistByEmail(string email)
+        public bool GetExistByEmail(string email)
         {
             foreach (var user in _users)
             {
-                if (user.Email == email) return user;
+                if (user.Email == email) return true;
             }
 
-            return new CredentialsDto();
+            return false;
         }
 
-        public CredentialsDto GetExistByLogin(string login)
+        public bool GetExistByLogin(string login)
         {
             foreach (var user in _users)
             {
-                if (user.Login == login) return user;
+                if (user.Login == login) return true;
             }
 
-            return new CredentialsDto();
+            return false;
         }
 
         public CredentialsDto GetUserByLogin(string login) => _users.Where(x => x.Login == login).FirstOrDefault();

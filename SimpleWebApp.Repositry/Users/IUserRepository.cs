@@ -13,10 +13,10 @@ namespace SimpleWebApp.Repository
         void RemoveUserById(long id);
         void RemoveUserByLogin(string login);
         void RemoveUserByEmail(string email);
-        CredentialsDto GetExist(long id);
-        CredentialsDto GetExistByEmail(string email);
-        CredentialsDto GetExistByLogin(string login);
-        CredentialsDto GetExist(CredentialsDto credential);
+        bool GetExist(long id);
+        bool GetExistByEmail(string email);
+        bool GetExistByLogin(string login);
+        bool GetExist(CredentialsDto credential);
         CredentialsDto GetUser(long id);
         CredentialsDto GetUserByLogin(string login);
         CredentialsDto GetUserByEmail(string email);

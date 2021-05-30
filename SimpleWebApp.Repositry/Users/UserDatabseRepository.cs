@@ -12,7 +12,7 @@ namespace SimpleWebApp.Repository
         public void AddUser(CredentialsDto credential)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = "INSERT INTO users (Login, Password) VALUES (@Login, @Password)";
+            string sqlQuery = "INSERT INTO users (Login, Password, Email, Roles) VALUES (@Login, @Password, @Email, @Roles)";
 
             int rowsAffected = db.Execute(sqlQuery, credential);
         }
@@ -25,28 +25,28 @@ namespace SimpleWebApp.Repository
             return db.QuerySingle<CredentialsDto>(sqlQuery, new CredentialsDto() { Id = id });
         }
 
-        public CredentialsDto GetExist(long id)
+        public bool GetExist(long id)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
             string sqlQuery = "SELECT * FROM users WHERE Id = @Id";
 
             var result = db.QuerySingle<CredentialsDto>(sqlQuery, new CredentialsDto() { Id = id });
-            return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
+            return result != null && result?.Login != null && result?.Password != null ? true : false;
         }
 
-        public CredentialsDto GetExist(CredentialsDto credential)
+        public bool GetExist(CredentialsDto credential)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = "SELECT * FROM users WHERE Login = @Login AND Password = @Password AND Email = @Email";
+            string sqlQuery = "SELECT * FROM users WHERE Login = @Login OR Email = @Email";
 
-            var result = db.QuerySingle<CredentialsDto>(sqlQuery, credential);
-            return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
+            var result = db.QuerySingleOrDefault<CredentialsDto>(sqlQuery, credential);
+            return result != null && result?.Login != null && result?.Password != null ? true : false;
         }
 
         public void UpdateUser(CredentialsDto credential)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
-            string sqlQuery = "UPDATE users SET Login = @Login, Password = @Password, Email = @Email WHERE Id = @Id";
+            string sqlQuery = "UPDATE users SET Login = @Login, Password = @Password, Email = @Email, Roles = @Roles WHERE Id = @Id";
 
             int rowsAffected = db.Execute(sqlQuery, credential);
         }
@@ -75,22 +75,22 @@ namespace SimpleWebApp.Repository
             int rowsAffected = db.Execute(sqlQuery, new { email });
         }
 
-        public CredentialsDto GetExistByEmail(string email)
+        public bool GetExistByEmail(string email)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
             string sqlQuery = "SELECT * FROM users WHERE Email = @email";
 
-            var result = db.QuerySingle<CredentialsDto>(sqlQuery, new { email });
-            return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
+            var result = db.QuerySingleOrDefault<CredentialsDto>(sqlQuery, new { email });
+            return result != null && result?.Login != null ? true : false;
         }
 
-        public CredentialsDto GetExistByLogin(string login)
+        public bool GetExistByLogin(string login)
         {
             using IDbConnection db = new MySqlConnection("Server=127.0.0.1;Database=simplewebapp;Uid=root;Pwd=my-secret-pw;");
             string sqlQuery = "SELECT * FROM users WHERE Login = @login";
 
-            var result = db.QuerySingle<CredentialsDto>(sqlQuery, new { login });
-            return result != null && result?.Login != null && result?.Password != null ? result : new CredentialsDto();
+            var result = db.QuerySingleOrDefault<CredentialsDto>(sqlQuery, new { login });
+            return result != null && result?.Login != null ? true : false;
         }
 
         public CredentialsDto GetUserByLogin(string login)

@@ -23,7 +23,9 @@ namespace SimpleWebApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IPredictionRepository, PredictionDatabseRepository>();
+            services.AddSingleton<IUserRepository, UserDatabseRepository>();
             services.AddSingleton<PredictionsManager>();
+            services.AddSingleton<UserManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options => options.LoginPath = new PathString("/auth"));
             services.AddAuthorization();
         }
@@ -45,7 +47,12 @@ namespace SimpleWebApp
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPage.html"));
+                    if (context.User.Identity.Name == null) { await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPage.html")); return; }
+                        
+                    var user = app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles;
+
+                    if (user == CredentialsDto.Admin) await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPageAdmin.html"));
+                    else await context.Response.WriteAsync(File.ReadAllText(@"Site/predictionsPageUser.html"));
                 });
 
                 endpoints.MapGet("/auth", async context =>
@@ -53,12 +60,30 @@ namespace SimpleWebApp
                     await context.Response.WriteAsync(File.ReadAllText(@"Site/loginPage.html"));
                 });
 
+                endpoints.MapGet("/registrationPage", async context =>
+                {
+                    if (context.User.Identity.Name == null) await context.Response.WriteAsync(File.ReadAllText(@"Site/registrationPage.html"));
+                });
+
+                endpoints.MapPost("/registration", async context =>
+                {
+                    if (context.User.Identity.Name == null)
+                    {
+                        var credentials = await context.Request.ReadFromJsonAsync<Credential>();
+                        credentials.Roles = CredentialsDto.User;
+
+                        if (!app.ApplicationServices.GetService<UserManager>().GetExist(credentials))
+                            app.ApplicationServices.GetService<UserManager>().AddUser(credentials);
+                        else
+                            await context.Response.WriteAsync("no");
+                    }
+                });
+
                 endpoints.MapPost("/login", async context =>
                 {
                     var credentials = await context.Request.ReadFromJsonAsync<Credential>();
-                    var user = new Credential() { Login = "admin", Password = "admin" };
 
-                    if (credentials.Login == user.Login && credentials.Password == user.Password)
+                    if (app.ApplicationServices.GetService<UserManager>().IsCorrectParams(credentials))
                     {
                         List<Claim> claims = new()
                         {
@@ -66,35 +91,51 @@ namespace SimpleWebApp
                         };
 
                         ClaimsIdentity id = new(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
+                        context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id)).GetAwaiter().GetResult();
 
-                        context.Response.Redirect("/adminPage");
+                        if (context.User.Identity.Name != null)
+                        {
+                            if (app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
+                                await context.Response.WriteAsync("go");
+                            else
+                                await context.Response.WriteAsync("ok");
+                        }
+                        else
+                            await context.Response.WriteAsync("not_auth");
                     }
+                    else { await context.Response.WriteAsync("not_auth"); }
                 });
 
                 endpoints.MapGet("/adminPage", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site/adminPage.html"));
+                    var user = app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles;
+                    if (user == CredentialsDto.Admin) await context.Response.WriteAsync(File.ReadAllText(@"Site/adminPage.html"));
+                    else context.Response.StatusCode = 404;
                 }).RequireAuthorization();
 
                 endpoints.MapGet("/answersPage", async context =>
                 {
-                    await context.Response.WriteAsync(File.ReadAllText(@"Site/answersPage.html"));
-                });
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
+                        await context.Response.WriteAsync(File.ReadAllText(@"Site/answersPage.html"));
+                }).RequireAuthorization();
 
                 endpoints.MapGet("/info", async context =>
                 {
-                    await context.Response.WriteAsync("<h8><b>Info</b></h8></br><a href=\"../\">Go to start</a></br><a href=\"../adminPage\">Go to admin page</a></br><a href=\"../answersPage\">Go to answers page</a></br><a href=\"../predictionsPage\">Go to predictions page</a>");
-                });
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
+                        await context.Response.WriteAsync("<h8><b>Info</b></h8></br><a href=\"../\">Go to start</a></br><a href=\"../adminPage\">Go to admin page</a></br><a href=\"../answersPage\">Go to answers page</a></br><a href=\"../predictionsPage\">Go to predictions page</a>");
+                }).RequireAuthorization();
 
                 endpoints.MapGet("/text", async context =>
                 {
-                    var res = context.Request.Headers[":path"][0].Split('?')[1];
-                    Dictionary<string, string> paramentars = new();
-                    foreach (var item in res.Split(',')) { paramentars.Add(item.Split('=')[0], item.Split('=')[1]); }
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
+                    {
+                        var res = context.Request.Headers[":path"][0].Split('?')[1];
+                        Dictionary<string, string> paramentars = new();
+                        foreach (var item in res.Split(',')) { paramentars.Add(item.Split('=')[0], item.Split('=')[1]); }
 
-                    await context.Response.WriteAsync(paramentars.ContainsKey("text") ? paramentars["text"] : "Ошибка");
-                });
+                        await context.Response.WriteAsync(paramentars.ContainsKey("text") ? paramentars["text"] : "Ошибка");
+                    }
+                }).RequireAuthorization();
 
                 endpoints.MapGet("/randomPrediction", async context =>
                 {
@@ -103,59 +144,72 @@ namespace SimpleWebApp
 
                 endpoints.MapGet("/gethtmlPredictions", async context =>
                 {
-                    string output = "<table><tr><td><center><h7 style=\"color: white\">Number</h7></center></td><td><center><h7 style=\"color: white\">Prediction</h7></center></td><td><center><h7 style=\"color: white\">Edit</h7></center></td><td><center><h7 style=\"color: white\">Delete</h7></center></td></tr>";
-
-                    int num = 0;
-                    foreach (var item in app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions())
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
-                        output += $"<tr><td><center><h7 style=\"color: white\">{num + 1}</h7></center></td><td><input type=\"text\" id=\"{item.Id}\" value=\"{item.PredictionString}\" style=\"color: black\">" + $"</td><td><center><button style=\"color: black\" onclick=\"Edit({item.Id})\">✎</button></center></td><td><center><button style=\"color: red\" onclick=\"Delete({item.Id})\">✘</button></center></td></tr>";
-                        num++;
+                        string output = "<table><tr><td><center><h7 style=\"color: white\">Number</h7></center></td><td><center><h7 style=\"color: white\">Prediction</h7></center></td><td><center><h7 style=\"color: white\">Edit</h7></center></td><td><center><h7 style=\"color: white\">Delete</h7></center></td></tr>";
+
+                        int num = 0;
+                        foreach (var item in app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions())
+                        {
+                            output += $"<tr><td><center><h7 style=\"color: white\">{num + 1}</h7></center></td><td><input type=\"text\" id=\"{item.Id}\" value=\"{item.PredictionString}\" style=\"color: black\">" + $"</td><td><center><button style=\"color: black\" onclick=\"Edit({item.Id})\">✎</button></center></td><td><center><button style=\"color: red\" onclick=\"Delete({item.Id})\">✘</button></center></td></tr>";
+                            num++;
+                        }
+
+                        output += "</table>";
+
+                        await context.Response.WriteAsync(output);
                     }
-
-                    output += "</table>";
-
-                    await context.Response.WriteAsync(output);
-                });
+                }).RequireAuthorization();
 
                 endpoints.MapGet("/getPredictions", async context =>
                 {
-                    await context.Response.WriteAsJsonAsync(app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions());
-                });
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
+                        await context.Response.WriteAsJsonAsync(app.ApplicationServices.GetService<PredictionsManager>().GetAllPredictions());
+                }).RequireAuthorization();
 
                 endpoints.MapPost("/addPrediction", async context =>
                 {
-                    if (!context.Request.HasJsonContentType())
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
-                        context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
-                        return;
-                    }
+                        if (!context.Request.HasJsonContentType())
+                        {
+                            context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
+                            return;
+                        }
 
-                    app.ApplicationServices.GetService<PredictionsManager>().AddPrediction((await context.Request.ReadFromJsonAsync<Prediction>()).PredictionString);
-                });
+                        app.ApplicationServices.GetService<PredictionsManager>().AddPrediction((await context.Request.ReadFromJsonAsync<Prediction>()).PredictionString);
+                    }
+                }).RequireAuthorization();
 
                 endpoints.MapPost("/deletePrediction", async context =>
                 {
-                    if (!context.Request.HasJsonContentType())
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
-                        context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
-                        return;
-                    }
+                        if (!context.Request.HasJsonContentType())
+                        {
+                            context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
+                            return;
+                        }
 
-                    app.ApplicationServices.GetService<PredictionsManager>().RemovePrediction((await context.Request.ReadFromJsonAsync<Prediction>()).Id);
-                });
+                        app.ApplicationServices.GetService<PredictionsManager>().RemovePrediction((await context.Request.ReadFromJsonAsync<Prediction>()).Id);
+                    }  
+                }).RequireAuthorization();
 
                 endpoints.MapPut("/editPrediction", async context =>
                 {
-                    if (!context.Request.HasJsonContentType())
+                    if (context.User.Identity.Name != null && app.ApplicationServices.GetService<UserManager>().GetUser(context.User.Identity.Name).Roles == CredentialsDto.Admin)
                     {
-                        context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
-                        return;
+                        if (!context.Request.HasJsonContentType())
+                        {
+                            context.Response.StatusCode = StatusCodes.Status415UnsupportedMediaType;
+                            return;
+                        }
+
+                        var query = await context.Request.ReadFromJsonAsync<Prediction>();
+
+                        app.ApplicationServices.GetService<PredictionsManager>().Edit(query.Id, query.PredictionString);
                     }
-
-                    var query = await context.Request.ReadFromJsonAsync<Prediction>();
-
-                    app.ApplicationServices.GetService<PredictionsManager>().Edit(query.Id, query.PredictionString);
-                });
+                }).RequireAuthorization();
             });
         }
     }
